@@ -1,5 +1,12 @@
 const cloudinary = require('cloudinary').v2;
 const { MongoClient } = require("mongodb");
+const fs = require('fs');
+const path = require('path');
+const multer = require('multer');
+
+// Multer configuration
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 require("dotenv").config();
 const { MONGO_URI } = process.env;
@@ -15,6 +22,9 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
     secure: true
 });
+
+
+// getResources handles both audio and image collections.
 
 const getResources = async (req, res, resourceType) => {
     console.log(`Fetching ${resourceType} resources`);
@@ -77,6 +87,80 @@ const getResources = async (req, res, resourceType) => {
   };
   
 
+
+// uploadResource handles both audio and image uploads.
+
+  const uploadResource = async (req, res, resourceType) => {
+    try {
+      console.log(`Uploading ${resourceType} from backend, /api/upload-${resourceType}`);
+      
+      // Common data between audio and image
+      const { tags, user, project } = req.body;
+  
+      let result;
+  
+      if (resourceType === 'video') {
+        // For audio uploads
+        const tempFilePath = path.join(__dirname, 'temp_audio.webm');
+        fs.writeFileSync(tempFilePath, req.file.buffer);
+  
+        result = await cloudinary.uploader.upload(tempFilePath, {
+          resource_type: 'auto',
+          format: 'webm',
+          tags: tags,
+        });
+  
+        fs.unlinkSync(tempFilePath);
+      } else if (resourceType === 'image') {
+        // For image uploads
+        const b64 = Buffer.from(req.file.buffer).toString("base64");
+        const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+  
+        result = await cloudinary.uploader.upload(dataURI, { tags: tags });
+      } else {
+        return res.status(500).json({ message: 'Invalid resource type' });
+      }
+  
+      // Common operations for both audio and image
+      console.log(`Uploaded to Cloudinary for ${resourceType}:`, result);
+  
+      // Add user & project key:value pairs to the object
+      const updatedResult = {
+        ...result,
+        user: user,
+        project: project,
+      };
+  
+      // Determine the collection name based on the resource type
+      const collectionName =
+        resourceType === 'video' ? 'users' : resourceType === 'image' ? 'sheets' : null;
+  
+      if (collectionName) {
+        // Add to MongoDB
+        const client = new MongoClient(MONGO_URI, options);
+        await client.connect();
+        const dbName = "music-branches";
+        const db = client.db(dbName);
+        console.log("hello from attempted mongo");
+        const mongoResult = await db.collection(collectionName).insertOne(updatedResult);
+        client.close();
+        res.status(200).json({
+          success: true,
+          message: `${resourceType} uploaded successfully`,
+          cloudinaryResult: result,
+          mongoResult,
+        });
+      } else {
+        return res.status(500).json({ message: 'Invalid resource type' });
+      }
+    } catch (error) {
+      console.error(`Error uploading to Cloudinary for ${resourceType}:`, error);
+      res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  };
+  
+  
   module.exports = {
-    getResources
+    getResources,
+    uploadResource
   };
