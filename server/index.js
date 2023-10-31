@@ -13,7 +13,8 @@ const options = {
 const {
   getResources,
   uploadResource,
-  deleteResource
+  deleteResource,
+  getAllTags
 } = require("./handlers/handlers");
 
 
@@ -64,12 +65,15 @@ app.get('/api/get-images', (req, res) => getResources(req, res, 'image'));
 
 // use uploadResource for both audio & image
 // on Cloudinary, audio files are considered 'video'
+// upload.single is using multer to handle the upload
 app.post('/api/upload-audio', upload.single('audio'), async (req, res) => uploadResource(req, res, 'video'));
 app.post('/api/upload-image', upload.single('image'), async (req, res) => uploadResource(req, res, 'image'));
 
 // deleteResource handles both types
 app.delete('/api/delete-resource/:resourceType/:id', deleteResource);
 
+// endpoints for tags
+app.get('/api/get-all-tags', getAllTags);
 
 const fs = require('fs');
 const path = require('path');
@@ -212,66 +216,6 @@ app.get('/api/get-user-projects', async (req, res) => {
     res.status(500).json({ success: false, message: 'Error fetching user projects' });
   }
 });
-
-
-app.get('/api/get-all-tags', async (req, res) => {
-  try {
-    const client = new MongoClient(MONGO_URI, options);
-    await client.connect();
-    const dbName = "music-branches";
-    const db = client.db(dbName);
-    const user = decodeURIComponent(req.query.user);
-    const project = decodeURIComponent(req.query.project);
-
-    const pipeline = [
-      {
-        $match: {
-          user: user,
-          project: project,
-        },
-      },
-      {
-        $project: {
-          tags: 1,
-        },
-      },
-      {
-        $unwind: "$tags",
-      },
-      {
-        $group: {
-          _id: "$tags",
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          allTags: { $addToSet: "$_id" },
-        },
-      },
-    ];
-
-    const audioResult = await db.collection("users").aggregate(pipeline).toArray();
-    const imageResult = await db.collection("sheets").aggregate(pipeline).toArray();
-    const allTags = new Set();
-
-    audioResult[0]?.allTags?.forEach((tag) => {
-      allTags.add(tag);
-    });
-
-    imageResult[0]?.allTags?.forEach((tag) => {
-      allTags.add(tag);
-    });
-
-    client.close();
-
-    return res.json(Array.from(allTags));
-  } catch (error) {
-    console.error('Error fetching all tags:', error);
-    return res.status(500).json({ message: 'Error fetching all tags' });
-  }
-});
-
 
 app.listen(port, () => {
     console.log(`Server is up and listening at port : ${port}`);
