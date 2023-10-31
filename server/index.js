@@ -12,6 +12,7 @@ const options = {
 
 const {
   getAudio,
+  getResources
 } = require("./handlers/handlers");
 
 
@@ -49,75 +50,14 @@ cloudinary.config({
     secure: true
 });
 
-app.get('/', (req, res) => {
-    res.status(200).json({message: 'hello world!'});
-})
+// app.get('/', (req, res) => {
+//     res.status(200).json({message: 'hello world!'});
+// })
 
-app.get('/api/get-audio', getAudio)
+//app.get('/api/get-audio', getAudio)
 
-// app.get('/api/get-audio', async (req, res) => {
-//     try {
-//       let publicIds;
-//       const user = decodeURIComponent(req.query.user);
-//       const project = decodeURIComponent(req.query.project);
-     
-//       // look up audio clips from user/project in MongoDB
-//       // return just the public_Ids of the clips
-//       try {
-//         const client = new MongoClient(MONGO_URI, options);
-//         await client.connect();
-//         const dbName = "music-branches";
-//         const db = client.db(dbName);
-//         const audioClips = await db.collection("users")
-//         .find({ user, project }, { projection: { public_id: 1, _id: 0 } })
-//         .toArray();
-   
-//         // create comma-separated strings:
-//         publicIds = await audioClips.map(clip => clip.public_id).join(',');
-//         console.log("publicIds:", publicIds);
-
-//         client.close();
-//         //return res.status(201).json({ status: 201, message: "success", mongoResult });
-//     } catch (err) {
-//         //res.status(500).json({ status: 500, message: err.message });
-//         console.log("failed to lookup user/project from mongo");
-//     }
-
-    
-//     if (!publicIds) {
-//       // Return a response indicating no clips were found
-//       return res.status(200).json({ message: 'No clips found for this user/project combination' });
-
-//     }
-    
-
-//       // const results = await fetch(`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/resources/video/`, {
-//         const results = await fetch(`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/resources/video?public_ids=${publicIds}`, {
-
-//         headers: {
-//           Authorization: `Basic ${Buffer.from(process.env.CLOUDINARY_API_KEY + ':' + process.env.CLOUDINARY_API_SECRET).toString('base64')}`
-//         }
-//       }).then(r => r.json());
-
-//       // need second lookup for tags
-//       const tagsArray = await Promise.all(results.resources.map(async (resource) => {
-//         const result = await cloudinary.api.resource(resource.public_id, { type: 'upload', resource_type: 'video' });
-//         return result.tags;
-//       }));
-
-//       // merge tags with main array before returning
-//       const mergedArray = results.resources.map((item, index) => {
-//         const tags = tagsArray[index] || [];
-//         return { ...item, tags };
-//       });
-      
-//       // res.json(results.resources);
-//       res.json(mergedArray);
-//     } catch (error) {
-//       console.error('Error fetching audio resources:', error);
-//       res.status(500).json({ success: false, message: 'Error fetching audio resources' });
-//     }
-//   });
+app.get('/api/get-audio', (req, res) => getResources(req, res, 'video'));
+app.get('/api/get-images', (req, res) => getResources(req, res, 'image'));
   
 
 const fs = require('fs');
@@ -206,73 +146,6 @@ app.post('/api/upload-image', upload.single('image'), async (req, res) => {
   } catch (error) {
     console.error('Error uploading to Cloudinary:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-
-
-app.get('/api/get-images', async (req, res) => {
-
-  // get images for current user/project
-
-  try {
-    
-    let publicIds;
-    const user = decodeURIComponent(req.query.user);
-    const project = decodeURIComponent(req.query.project);
-
-    // look up images using user / project in Mongo
-    // return just the public_Ids of the images
-
-    try {
-      const client = new MongoClient(MONGO_URI, options);
-      await client.connect();
-      const dbName = "music-branches";
-      const db = client.db(dbName);
-      const audioClips = await db.collection("sheets")
-      .find({ user, project }, { projection: { public_id: 1, _id: 0 } })
-      .toArray();
-      console.log("audioClips:", audioClips);
-      // create comma-separated strings:
-      publicIds = await audioClips.map(clip => clip.public_id).join(',');
-      console.log("publicIds:", publicIds);
-      client.close();
-      //return res.status(201).json({ status: 201, message: "success", mongoResult });
-    } catch (err) {
-      //res.status(500).json({ status: 500, message: err.message });
-      console.log("failed to lookup user/project from mongo");
-    }
-
-    if (!publicIds) {
-      // Return a response indicating no clips were found
-      return res.status(200).json({ message: 'No sheet music found for this user/project combination' });
-
-    }
-
-    const results = await fetch(`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/resources/image?public_ids=${publicIds}`, {
-      headers: {
-        Authorization: `Basic ${Buffer.from(process.env.CLOUDINARY_API_KEY + ':' + process.env.CLOUDINARY_API_SECRET).toString('base64')}`
-      }
-    }).then(r => r.json());
-
-    //console.log("results:", results);
-
-    // need second lookup for tags
-    const tagsArray = await Promise.all(results.resources.map(async (resource) => {
-      const result = await cloudinary.api.resource(resource.public_id, { type: 'upload', resource_type: 'image' });
-      return result.tags;
-    }));
-
-  // merge tags with main array before returning
-  const mergedArray = results.resources.map((item, index) => {
-    const tags = tagsArray[index] || [];
-    return { ...item, tags };
-  });
-
-    res.json(mergedArray);
-  } catch (error) {
-    console.error('Error fetching image resources:', error);
-    res.status(500).json({ success: false, message: 'Error fetching image resources' });
   }
 });
 
