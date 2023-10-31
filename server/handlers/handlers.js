@@ -266,9 +266,60 @@ const getResources = async (req, res, resourceType) => {
     }
   }
 
+
+  // updateTags
+  const updateTags = async (req, res) => {
+  console.log("hello from backend, /api/update-tags");
+  console.log("I have this:", req.body);
+
+  const tagsToAdd = req.body.tags;
+  const publicId = req.body.publicId;
+  const collectionName = req.params.collection; // Added parameter for collection name
+  console.log("publicId:", publicId)
+  let resourceType = "image";
+
+  if (collectionName === "users") {
+    resourceType = "video"
+  } else {
+    resourceType = "image"
+  }
+  
+  try {
+    // Update tags in Cloudinary
+    const cloudinaryResult = await cloudinary.uploader.add_tag(tagsToAdd, publicId, { type: 'upload', resource_type: resourceType });
+    console.log("Cloudinary response", cloudinaryResult);
+
+    // Update tags in MongoDB
+    const client = new MongoClient(MONGO_URI, options);
+    await client.connect();
+    const dbName = "music-branches";
+    const db = client.db(dbName);
+ 
+    const query = { public_id: publicId };
+    const action = {
+      $push: {
+        tags: { $each: tagsToAdd },
+      },
+    };
+    // Use the collection name parameter to dynamically select the collection
+    const mongoResult = await db.collection(collectionName).updateOne(query, action);
+
+    console.log("Mongo result:", mongoResult);
+    client.close();
+
+    // Both Cloudinary and MongoDB operations completed successfully
+    return res.status(200).json({ message: "Success" });
+  } catch (error) {
+    console.error('Error updating tags:', error);
+    return res.status(500).json({ message: 'Error updating tags' });
+  }
+  }
+
+
   module.exports = {
     getResources,
     uploadResource,
     deleteResource,
-    getAllTags
+    getAllTags,
+    updateTags
   };
