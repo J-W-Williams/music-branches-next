@@ -15,7 +15,8 @@ const {
   uploadResource,
   deleteResource,
   getAllTags,
-  updateTags
+  updateTags,
+  deleteTag
 } = require("./handlers/handlers");
 
 
@@ -76,59 +77,10 @@ app.delete('/api/delete-resource/:resourceType/:id', deleteResource);
 // endpoints for tags
 app.get('/api/get-all-tags', getAllTags);
 app.post('/api/update-tags/:collection', updateTags);
+app.delete('/api/delete-tag/:publicId/:tags/:collection', deleteTag);
 
 const fs = require('fs');
 const path = require('path');
-
-app.delete('/api/delete-tag/:publicId/:tags/:collection', async (req, res) => {
-  console.log("hello from backend, /api/delete-tag");
-
-  const publicId = req.params.publicId;
-  const tagsToDelete = req.params.tags;
-  const collectionName = req.params.collection; 
-  let resourceType = "image";
-
-  if (collectionName === "users") {
-    resourceType = "video"
-  } else {
-    resourceType = "image"
-  }
-
-  console.log("publicId:", publicId);
-  console.log("tagsToDelete:", tagsToDelete);
-  console.log("collectionName:", collectionName);
-
-  try {
-    // Update tags in Cloudinary
-    const cloudinaryResult = await cloudinary.uploader.remove_tag(tagsToDelete, publicId, { type: 'upload', resource_type: resourceType });
-    console.log("Cloudinary response", cloudinaryResult);
-
-    // Update tags in MongoDB
-    const client = new MongoClient(MONGO_URI, options);
-    await client.connect();
-    const dbName = "music-branches";
-    const db = client.db(dbName);
-
-    const query = { public_id: publicId };
-    const action = {
-      $pull: {
-        tags: { $in: [tagsToDelete] },
-      },
-    };
-
-    // Use the collection name parameter to dynamically select the collection
-    const mongoResult = await db.collection(collectionName).updateOne(query, action);
-
-    console.log("Mongo result:", mongoResult);
-    client.close();
-
-    // Both Cloudinary and MongoDB operations completed successfully
-    return res.status(200).json({ message: "Success" });
-  } catch (error) {
-    console.error('Error deleting tags:', error);
-    return res.status(500).json({ message: 'Error deleting tags' });
-  }
-});
 
 // this endpoint populates the projects dropdown
 // data comes from MongoDB.
