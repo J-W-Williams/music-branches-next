@@ -11,8 +11,8 @@ const options = {
 };
 
 const {
-  getAudio,
-  getResources
+  getResources,
+  uploadResource
 } = require("./handlers/handlers");
 
 
@@ -56,98 +56,18 @@ cloudinary.config({
 
 //app.get('/api/get-audio', getAudio)
 
+// endpoints 
+// use getResources for both audio & image
 app.get('/api/get-audio', (req, res) => getResources(req, res, 'video'));
 app.get('/api/get-images', (req, res) => getResources(req, res, 'image'));
-  
 
+// use uploadResource for both audio & image
+app.post('/api/upload-audio', upload.single('audio'), async (req, res) => uploadResource(req, res, 'video'));
+app.post('/api/upload-image', upload.single('image'), async (req, res) => uploadResource(req, res, 'image'));
+
+  
 const fs = require('fs');
 const path = require('path');
-
-app.post('/api/upload-audio', upload.single('audio'), async (req, res) => {
-  console.log("hello from backend, /api/upload-audio");
-  console.log("I have this:", req.file);
-
-  const { tags, user, project } = req.body;
-  console.log("user / project:", user, project);
-
-  try {
-
-    const tempFilePath = path.join(__dirname, 'temp_audio.webm');
-    fs.writeFileSync(tempFilePath, req.file.buffer);
-
-    const result = await cloudinary.uploader.upload(tempFilePath, {
-        resource_type: 'auto',
-        format: 'webm',
-        tags: tags, 
-    });
-
-    console.log('Uploaded to Cloudinary:', result);
-
-    fs.unlinkSync(tempFilePath);
-    res.json({ success: true, message: 'Audio uploaded successfully' });
-
-    // add user & project key:value pairs to the object
-    const updatedResult = {
-      ...result, 
-      user: user, 
-      project: project,
-    };
-
-    // then add to MongoDB
-    const client = new MongoClient(MONGO_URI, options);
-        try {
-            await client.connect();
-            const dbName = "music-branches";
-            const db = client.db(dbName);
-            console.log("hello from attempted mongo");
-            const mongoResult = await db.collection("users").insertOne(updatedResult);
-            client.close();
-            //return res.status(201).json({ status: 201, message: "success", mongoResult });
-        } catch (err) {
-            //res.status(500).json({ status: 500, message: err.message });
-        }
-
-  } catch (error) {
-    console.error('Error uploading to Cloudinary:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-})
-
-app.post('/api/upload-image', upload.single('image'), async (req, res) => {
- 
-  const { tags, user, project } = req.body;
-
-  try {
-    const b64 = Buffer.from(req.file.buffer).toString("base64");
-    const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
-
-    // Upload to Cloudinary
-    const cloudinaryResult = await cloudinary.uploader.upload(dataURI, { tags: tags });
-    console.log('Uploaded to Cloudinary:', cloudinaryResult);
-
- // add user & project key:value pairs to the object
- const updatedResult = {
-  ...cloudinaryResult, 
-  user: user, 
-  project: project,
-};
-
-
-    // Add MongoDB info
-    const client = new MongoClient(MONGO_URI, options);
-    await client.connect();
-    const dbName = "music-branches";
-    const db = client.db(dbName);
-
-    const mongoResult = await db.collection("sheets").insertOne(updatedResult);
-    client.close();
-
-    res.status(200).json({ success: true, message: 'Image uploaded successfully', cloudinaryResult, mongoResult });
-  } catch (error) {
-    console.error('Error uploading to Cloudinary:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
 
 
 app.delete('/api/delete-resource/:resourceType/:id', async (req, res) => {
