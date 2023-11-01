@@ -51,7 +51,7 @@ const SheetMusic = () => {
           const response = await fetch(`/api/get-images?user=${loggedInUser}&project=${selectedProject}`);
           const data = await response.json();
           if (response.status === 200) {              
-            if (data.message === 'No sheet music found for this user/project combination') {
+            if (data.message === 'No clips found for this user/project combination') {
               setImageResources([]);
               setMessage('No sheet music yet!');
             } else {
@@ -150,7 +150,7 @@ const SheetMusic = () => {
   return (
     <Wrapper>
       <Title>Your Sheet Music Collection!</Title>
-      <p>{message}</p>     
+      <MainText>{message}</MainText>     
       <UploaderContainer>
         <MyInput>        
           <CustomFileInput>

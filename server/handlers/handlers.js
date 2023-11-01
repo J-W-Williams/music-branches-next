@@ -59,7 +59,8 @@ const getResources = async (req, res, resourceType) => {
       }
   
       if (!publicIds) {
-        return res.status(200).json({ message: `No ${resourceType} found for this user/project combination` });
+        return res.status(200).json({ message: 'No clips found for this user/project combination' });
+        //return res.status(200).json([]);
       }
   
       const results = await fetch(`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/resources/${resourceType}?public_ids=${publicIds}`, {

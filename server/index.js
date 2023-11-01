@@ -115,6 +115,8 @@ app.get('/api/get-user-projects', async (req, res) => {
       return result;
     }, {});
 
+    console.log("from get-user-projects, userProjectsData:", userProjectsData);
+
     res.json(userProjectsData);
   } catch (error) {
     // Handle errors and return an error response
