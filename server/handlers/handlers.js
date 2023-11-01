@@ -160,7 +160,56 @@ const getResources = async (req, res, resourceType) => {
   };
   
   
+  // delete function handles both audio and images.
+  const deleteResource = async (req, res) => {
+
+    const resourceType = req.params.resourceType;
+    const id = req.params.id;
+  
+    try {
+      const options = '';
+  
+      // Delete from Cloudinary
+      const public_id = id;
+      const cloudinaryResult = await cloudinary.uploader.destroy(public_id, {
+        type: 'upload',
+        resource_type: resourceType,
+      });
+      console.log('cloudinaryResult:', cloudinaryResult);
+  
+      // Remove from MongoDB
+      const client = new MongoClient(MONGO_URI, options);
+  
+      try {
+        await client.connect();
+        const dbName = 'music-branches';
+        const db = client.db(dbName);
+  
+        // Use the resourceType parameter to determine the collection
+        const collectionName =
+          resourceType === 'video' ? 'users' : 'sheets';
+  
+        const query = { public_id: id };
+        const mongoResult = await db.collection(collectionName).deleteOne(query);
+  
+        console.log('mongo result:', mongoResult);
+        client.close();
+  
+        // Both Cloudinary and MongoDB operations completed successfully
+        return res.status(200).json({ message: 'Success' });
+      } catch (err) {
+        console.error('Error deleting from MongoDB:', err);
+        return res.status(500).json({ message: 'Error deleting from MongoDB' });
+      }
+    } catch (error) {
+      console.error('Error deleting resources:', error);
+      return res.status(500).json({ message: 'Error deleting resources' });
+    }
+
+  };
+
   module.exports = {
     getResources,
-    uploadResource
+    uploadResource,
+    deleteResource
   };
