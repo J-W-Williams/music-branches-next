@@ -11,6 +11,7 @@ const options = {
 };
 
 const {
+  getUserProjects,
   getResources,
   uploadResource,
   deleteResource,
@@ -84,46 +85,8 @@ const path = require('path');
 
 // this endpoint populates the projects dropdown
 // data comes from MongoDB.
-app.get('/api/get-user-projects', async (req, res) => {
-  try {
-   
-    const client = new MongoClient(MONGO_URI, options);
-    await client.connect();
-    const dbName = "music-branches";
-    const db = client.db(dbName);
+app.get('/api/get-user-projects', getUserProjects);
 
-    
-    const userProjects = await db.collection("users").aggregate([
-      {
-        $group: {
-          _id: "$user",
-          projects: {
-            $addToSet: "$project", 
-          },
-        },
-      },
-    ]).toArray();
-
-    console.log("from get-user-projects, userProjects:", userProjects);
-    client.close();
-
-    const userProjectsData = userProjects.reduce((result, item) => {
-      result[item._id] = item.projects.map((project, index) => ({
-        id: index + 1,
-        name: project,
-      }));
-      return result;
-    }, {});
-
-    console.log("from get-user-projects, userProjectsData:", userProjectsData);
-
-    res.json(userProjectsData);
-  } catch (error) {
-    // Handle errors and return an error response
-    console.error('Error fetching user projects:', error);
-    res.status(500).json({ success: false, message: 'Error fetching user projects' });
-  }
-});
 
 app.listen(port, () => {
     console.log(`Server is up and listening at port : ${port}`);
