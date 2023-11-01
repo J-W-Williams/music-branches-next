@@ -25,7 +25,6 @@ cloudinary.config({
 
 
 // getResources handles both audio and image collections.
-
 const getResources = async (req, res, resourceType) => {
     console.log(`Fetching ${resourceType} resources`);
     try {
@@ -89,7 +88,6 @@ const getResources = async (req, res, resourceType) => {
 
 
 // uploadResource handles both audio and image uploads.
-
   const uploadResource = async (req, res, resourceType) => {
     try {
       console.log(`Uploading ${resourceType} from backend, /api/upload-${resourceType}`);
@@ -208,8 +206,69 @@ const getResources = async (req, res, resourceType) => {
 
   };
 
+
+  // tag functions
+  const getAllTags = async (req, res) => {
+    try {
+      const client = new MongoClient(MONGO_URI, options);
+      await client.connect();
+      const dbName = "music-branches";
+      const db = client.db(dbName);
+      const user = decodeURIComponent(req.query.user);
+      const project = decodeURIComponent(req.query.project);
+  
+      const pipeline = [
+        {
+          $match: {
+            user: user,
+            project: project,
+          },
+        },
+        {
+          $project: {
+            tags: 1,
+          },
+        },
+        {
+          $unwind: "$tags",
+        },
+        {
+          $group: {
+            _id: "$tags",
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            allTags: { $addToSet: "$_id" },
+          },
+        },
+      ];
+  
+      const audioResult = await db.collection("users").aggregate(pipeline).toArray();
+      const imageResult = await db.collection("sheets").aggregate(pipeline).toArray();
+      const allTags = new Set();
+  
+      audioResult[0]?.allTags?.forEach((tag) => {
+        allTags.add(tag);
+      });
+  
+      imageResult[0]?.allTags?.forEach((tag) => {
+        allTags.add(tag);
+      });
+  
+      client.close();
+  
+      return res.json(Array.from(allTags));
+    } catch (error) {
+      console.error('Error fetching all tags:', error);
+      return res.status(500).json({ message: 'Error fetching all tags' });
+    }
+  }
+
   module.exports = {
     getResources,
     uploadResource,
-    deleteResource
+    deleteResource,
+    getAllTags
   };
