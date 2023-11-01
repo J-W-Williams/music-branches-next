@@ -22,21 +22,31 @@ const Collection = () => {
     
   // handle sorting of audio clips via buttons
   const sortResources = (resources) => {
-    return resources.slice().sort((a, b) => {
-      if (sortBy === 'date') {
-        if (sortDateOrder === 'newest') {
-          return new Date(b.created_at) - new Date(a.created_at);
-        } else if (sortDateOrder === 'oldest') {
-          return new Date(a.created_at) - new Date(b.created_at);
+
+
+    console.log("resources:", resources);
+
+    //if (resources.length =! 0) {
+
+      return resources.slice().sort((a, b) => {
+        if (sortBy === 'date') {
+          if (sortDateOrder === 'newest') {
+            return new Date(b.created_at) - new Date(a.created_at);
+          } else if (sortDateOrder === 'oldest') {
+            return new Date(a.created_at) - new Date(b.created_at);
+          }
+        } else if (sortBy === 'duration') {
+          if (sortDurationOrder === 'shortest') {
+            return a.bytes - b.bytes;
+          } else if (sortDurationOrder === 'longest') {
+            return b.bytes - a.bytes;
+          }
         }
-      } else if (sortBy === 'duration') {
-        if (sortDurationOrder === 'shortest') {
-          return a.bytes - b.bytes;
-        } else if (sortDurationOrder === 'longest') {
-          return b.bytes - a.bytes;
-        }
-      }
-    });
+      });
+
+    //};
+
+
   };
     
  

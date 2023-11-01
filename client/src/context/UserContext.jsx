@@ -64,8 +64,11 @@ export const UserProvider = ({ children }) => {
 
   const logout = () => {
     setLoggedInUser(null);
-    localStorage.removeItem('loggedInUser');setLoggedInUser(null);
-    setSelectedProject("No project selected");
+    localStorage.removeItem('loggedInUser');
+    localStorage.removeItem('selectedProject');
+    setLoggedInUser(null);
+    // setSelectedProject("No project selected");
+    setSelectedProject(null);
   };
 
   const createProject = (user, projectName) => {
