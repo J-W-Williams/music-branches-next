@@ -23,11 +23,6 @@ const Collection = () => {
   // handle sorting of audio clips via buttons
   const sortResources = (resources) => {
 
-
-    console.log("resources:", resources);
-
-    //if (resources.length =! 0) {
-
       return resources.slice().sort((a, b) => {
         if (sortBy === 'date') {
           if (sortDateOrder === 'newest') {
@@ -43,9 +38,6 @@ const Collection = () => {
           }
         }
       });
-
-    //};
-
 
   };
     

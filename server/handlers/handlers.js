@@ -2,11 +2,6 @@ const cloudinary = require('cloudinary').v2;
 const { MongoClient } = require("mongodb");
 const fs = require('fs');
 const path = require('path');
-const multer = require('multer');
-
-// Multer configuration
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
 require("dotenv").config();
 const { MONGO_URI } = process.env;
@@ -23,7 +18,7 @@ cloudinary.config({
     secure: true
 });
 
-// getUserProjects populates the projects dropdown
+// getUserProjects populates the projects dropdown.
 // the data comes from MongoDB
 
 const getUserProjects = async (req, res, resourceType) => {

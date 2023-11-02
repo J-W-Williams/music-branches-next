@@ -2,14 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const multer = require('multer');
 
-const cloudinary = require('cloudinary').v2;
-const { MongoClient } = require("mongodb");
-
-const options = {
-   useNewUrlParser: true,
-   useUnifiedTopology: true,
-};
-
+// handlers
 const {
   getUserProjects,
   getResources,
@@ -20,21 +13,20 @@ const {
   deleteTag
 } = require("./handlers/handlers");
 
-
-require("dotenv").config();
-const { MONGO_URI } = process.env;
 const port = 8000;
 const app = express();
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
-// Multer configuration
+// Multer configuration (to handle uploads)
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+// morgan tiny for nice feedback
 app.use(morgan('tiny'))
 
+// access control config
 app.use(function (req, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.header(
@@ -48,46 +40,46 @@ app.use(function (req, res, next) {
   next();
 })
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-    secure: true
-});
+// endpoints:
 
-// app.get('/', (req, res) => {
-//     res.status(200).json({message: 'hello world!'});
-// })
+// get-user-projects
+// get-audio
+// get-images
+// upload-audio
+// upload-image
+// delete-resource
+// get-all-tags
+// update-tags
+// delete-tag
 
-//app.get('/api/get-audio', getAudio)
+// get-user-projects
+// populate the user/projects dropdown
+// data comes from MongoDB.
+app.get('/api/get-user-projects', getUserProjects);
 
-// endpoints 
-// use getResources for both audio & image
+// get-audio / get-images: 
+// use getResources for both
+// get user/project audio & images
 app.get('/api/get-audio', (req, res) => getResources(req, res, 'video'));
 app.get('/api/get-images', (req, res) => getResources(req, res, 'image'));
 
-// use uploadResource for both audio & image
-// on Cloudinary, audio files are considered 'video'
-// upload.single is using multer to handle the upload
+// upload audio & images to Cloudinary / store returned data to MongoDB
+// uploadResource is used for both audio & image.
+// Note: on Cloudinary, audio files are considered 'video'
+// Note: upload.single is using multer to handle the upload
 app.post('/api/upload-audio', upload.single('audio'), async (req, res) => uploadResource(req, res, 'video'));
 app.post('/api/upload-image', upload.single('image'), async (req, res) => uploadResource(req, res, 'image'));
 
+// delete elements
 // deleteResource handles both types
 app.delete('/api/delete-resource/:resourceType/:id', deleteResource);
 
-// endpoints for tags
+// tags
 app.get('/api/get-all-tags', getAllTags);
 app.post('/api/update-tags/:collection', updateTags);
 app.delete('/api/delete-tag/:publicId/:tags/:collection', deleteTag);
 
-const fs = require('fs');
-const path = require('path');
-
-// this endpoint populates the projects dropdown
-// data comes from MongoDB.
-app.get('/api/get-user-projects', getUserProjects);
-
-
+// start server
 app.listen(port, () => {
     console.log(`Server is up and listening at port : ${port}`);
 })
