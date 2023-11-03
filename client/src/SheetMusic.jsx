@@ -18,6 +18,8 @@ const SheetMusic = () => {
     const [tagUpdated, setTagUpdated] = useState(false);
     const [itemDeleted, setItemDeleted] = useState(false);
     const [sortImageBy, setSortImageBy] = useState('newest');
+    const [activeSortButton, setActiveSortButton] = useState();
+
   
     // handle sorting of elements by date
     const sortImageResources = (resources) => {
@@ -176,12 +178,20 @@ const SheetMusic = () => {
         </MainText>   
         <SortButtonContainer>
           <SortButton
-            onClick={() => setSortImageBy('newest')}
+            className={activeSortButton === 'newest' ? 'active' : ''}
+            onClick={() => {              
+              setSortImageBy('newest')
+              setActiveSortButton('newest');
+            }}  
           >
             Newest
           </SortButton>
           <SortButton
-            onClick={() => setSortImageBy('oldest')}
+            className={activeSortButton === 'oldest' ? 'active' : ''}
+            onClick={() => {              
+              setSortImageBy('oldest')
+              setActiveSortButton('oldest');
+            }}  
           >
             Oldest
           </SortButton>
