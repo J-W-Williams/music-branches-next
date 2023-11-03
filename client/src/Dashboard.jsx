@@ -102,7 +102,7 @@ const Dashboard = () => {
 
       <MediaResourceHolder>   
         {filteredImageResources.map((resource, index) => (
-          <div key={resource.id + index}>
+          <div key={index}>
             <Thumbnail src={resource.secure_url} alt={resource.public_id} onClick={() => openModal(resource)} />
           </div>
         ))} 
@@ -110,7 +110,7 @@ const Dashboard = () => {
 
       <MediaResourceHolder>    
         {filteredAudioResources.map((resource, index) => (
-          <div key={resource.id + index}>
+          <div key={index}>
             <audio controls>
               <source src={resource.secure_url} type="audio/webm" />
             </audio>   
