@@ -84,7 +84,7 @@ const Dashboard = () => {
   return (
     <Wrapper>
       <Title>
-        Dashboard!
+        Dashboard for {selectedProject}
       </Title>
       
       <MyLink to="/collection"> <MainText>Current audio clips {audioResources.length}</MainText> </MyLink>
