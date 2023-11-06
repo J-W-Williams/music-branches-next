@@ -151,7 +151,7 @@ const SheetMusic = () => {
 
   return (
     <Wrapper>
-      <Title>Your Sheet Music Collection!</Title>
+      <Title>Sheet Music Collection for {selectedProject}</Title>
       <MainText>{message}</MainText>     
       <UploaderContainer>
         <MyInput>        

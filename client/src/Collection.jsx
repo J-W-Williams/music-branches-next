@@ -136,7 +136,7 @@ const Collection = () => {
   return (
     <Wrapper>
      
-      <Title>Your Audio Collection</Title>
+      <Title>Audio Collection for {selectedProject}</Title>
       <MainText>{message}</MainText>
       
       <ButtonHolder>
