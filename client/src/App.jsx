@@ -13,6 +13,7 @@ import { useUserContext } from './context/UserContext';
 const App = () => {
 
   const { loggedInUser, userProjects, selectedProject } = useUserContext();
+  console.log("loggedInUser:", loggedInUser);
 
   return (
     <div>

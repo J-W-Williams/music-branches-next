@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import styled from "styled-components";
+import styled, {keyframes} from "styled-components";
 import TagManager from './components/TagManager';
 import { useUserContext } from './context/UserContext';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +19,7 @@ const Collection = () => {
   const [sortDateOrder, setSortDateOrder] = useState('newest');
   const [sortDurationOrder, setSortDurationOrder] = useState('longest');
   const [activeSortButton, setActiveSortButton] = useState();
+  const [loading, setLoading] = useState(false);
     
   // handle sorting of audio clips via buttons
   const sortResources = (resources) => {
@@ -60,6 +61,9 @@ const Collection = () => {
   
     async function fetchAudioResources() {
         try {
+
+          setLoading(true);
+
           const response = await fetch(`/api/get-audio?user=${loggedInUser}&project=${selectedProject}`);
           const data = await response.json();
           if (response.status === 200) {
@@ -68,6 +72,7 @@ const Collection = () => {
               setAudioResources([]);
               setMessage('No clips yet!');
             } else {
+              setLoading(false)
               setAudioResources(data);
               setMessage(''); 
             }
@@ -135,7 +140,7 @@ const Collection = () => {
 
   return (
     <Wrapper>
-     
+       
       <Title>Audio Collection for {selectedProject}</Title>
       <MainText>{message}</MainText>
       
@@ -184,34 +189,80 @@ const Collection = () => {
         </SortButton>
       </ButtonHolder>
 
-      <MyList>        
-        {sortResources(audioResources).map(resource => (
-          <MyListItem key={resource.public_id}>
-            <InnerList>
-              <p><BoldSpan>Date:</BoldSpan> {resource.created_at}</p>
-              <p><BoldSpan>Duration:</BoldSpan>  {resource.bytes}</p>
-            </InnerList>
-            <TagManager
-              resource={resource}
-              onUpdateTags={updateTags}
-              onDeleteTag={handleDeleteTag}
-              tagsInput={tagsInput} 
-            />                       
-            <ButtonHolder>
-              <MyButton onClick={() => handleTranscribe(resource.secure_url)}>Transcribe this clip</MyButton>
-              <MyButton onClick={() => handleChart(resource.secure_url)}>Create chart for this clip</MyButton>
-              <MyButton onClick={() => handleDestroy('video', resource.public_id)}>Delete this audio clip</MyButton>
-            </ButtonHolder>
-            <MyAudio controls>
-              <source src={resource.secure_url} type="audio/webm" />
-            </MyAudio>
-          </MyListItem>
-        ))}       
-      </MyList>
+      {loading ? (
+  <LoaderContainer>
+    <Spinner />
+  </LoaderContainer>
+) : (
+  <MyList>
+    {sortResources(audioResources).map((resource) => (
+      <MyListItem key={resource.public_id}>
+        <InnerList>
+          <p>
+            <BoldSpan>Date:</BoldSpan> {resource.created_at}
+          </p>
+          <p>
+            <BoldSpan>Duration:</BoldSpan> {resource.bytes}
+          </p>
+        </InnerList>
+        <TagManager
+          resource={resource}
+          onUpdateTags={updateTags}
+          onDeleteTag={handleDeleteTag}
+          tagsInput={tagsInput}
+        />
+        <ButtonHolder>
+          <MyButton onClick={() => handleTranscribe(resource.secure_url)}>
+            Transcribe this clip
+          </MyButton>
+          <MyButton onClick={() => handleChart(resource.secure_url)}>
+            Create chart for this clip
+          </MyButton>
+          <MyButton
+            onClick={() => handleDestroy('video', resource.public_id)}
+          >
+            Delete this audio clip
+          </MyButton>
+        </ButtonHolder>
+        <MyAudio controls>
+          <source src={resource.secure_url} type="audio/webm" />
+        </MyAudio>
+      </MyListItem>
+    ))}
+  </MyList>
+)}
+
   
     </Wrapper>
   )
 }
+
+const SpinAnimation = keyframes`
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg);}
+`
+
+const LoaderContainer = styled.div`
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  background: rgba(0, 0, 0, 0.834);
+  z-index: 1;
+`
+
+const Spinner = styled.div`
+  width: 64px;
+  height: 64px;
+  border: 8px solid;
+  border-color: #3d5af1 transparent #3d5af1 transparent;
+  border-radius: 50%;
+  animation-name: ${SpinAnimation};
+  animation-duration: 8s;
+  animation-iteration-count: infinite;
+`
 
 const BoldSpan = styled.span`
   font-weight: 700;
