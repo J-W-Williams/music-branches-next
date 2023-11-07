@@ -139,6 +139,11 @@ const Collection = () => {
   };
       
 
+  const handleDate = (incomingDate) => {
+    const fixedDate = incomingDate.replace("T", " at ").replace("Z", "");
+    return fixedDate;
+  }
+
   return (
     <Wrapper>
        
@@ -198,7 +203,7 @@ const Collection = () => {
       <MyListItem key={resource.public_id}>
         <InnerList>
           <p>
-            <BoldSpan>Date:</BoldSpan> {resource.created_at}
+            <BoldSpan>Date:</BoldSpan> {handleDate(resource.created_at)}
           </p>
           <p>
             <BoldSpan>Duration:</BoldSpan> {resource.bytes}

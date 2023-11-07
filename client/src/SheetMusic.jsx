@@ -152,6 +152,11 @@ const SheetMusic = () => {
     }
   };
 
+  const handleDate = (incomingDate) => {
+    const fixedDate = incomingDate.replace("T", " at ").replace("Z", "");
+    return fixedDate;
+  }
+
   return (
     <Wrapper>
       <Title>Sheet Music Collection for {selectedProject}</Title>
@@ -206,7 +211,7 @@ const SheetMusic = () => {
       <GalleryWrapper>
         {sortImageResources(imageResources).map((image, index) => (
           <GalleryItem key={image.public_id + index}>
-            <MainText>Date: {image.created_at}</MainText>
+            <MainText><BoldSpan>Date:</BoldSpan> {handleDate(image.created_at)}</MainText>
             <Thumbnail  src={image.secure_url} alt={image.public_id} onClick={() => openModal(image)} />          
             <TagManager
               resource={image}
@@ -230,6 +235,10 @@ const SheetMusic = () => {
     </Wrapper>
   )
 }
+
+const BoldSpan = styled.span`
+  font-weight: 700;
+`
 
 const GalleryWrapper = styled.div`
   padding-top: 10px;
