@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useUserContext } from './context/UserContext';
 import { styled } from 'styled-components';
 import { Link } from 'react-router-dom';
+import LoadingSpinner from './components/LoadingSpinner';
 
 const Dashboard = () => {
 
@@ -11,6 +12,7 @@ const Dashboard = () => {
   const [activeImage, setActiveImage] = useState(null);
   const [tags, setTags] = useState([]);
   const [selectedTag, setSelectedTag] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // controls for modal when viewing full-screen image
   const openModal = image => {
@@ -27,7 +29,7 @@ const Dashboard = () => {
     // then get all tags to populate Tag Cloud
     async function fetchResourcesAndTags() {
       try {
-    
+        setLoading(true);
         const audioResponse = await fetch(`/api/get-audio?user=${loggedInUser}&project=${selectedProject}`);
         const imageResponse = await fetch(`/api/get-images?user=${loggedInUser}&project=${selectedProject}`);
         
@@ -58,6 +60,7 @@ const Dashboard = () => {
         if (tagsResponse.ok) {
           const tagsData = await tagsResponse.json();
           setTags(tagsData);
+          setLoading(false);
         } else {
           console.error('Failed to fetch tags:', tagsResponse.status);
         }
@@ -83,15 +86,20 @@ const Dashboard = () => {
   
   return (
     <Wrapper>
+      
       <Title>
         Dashboard for {selectedProject}
       </Title>
+      
       
       <MyLink to="/collection"> <MainText>Current audio clips {audioResources.length}</MainText> </MyLink>
       <MyLink to="/sheet-music"> <MainText>Sheet music collection {imageResources.length}</MainText> </MyLink>
   
       <Title>Tag Cloud</Title>
-
+      
+      {loading ? (
+    <LoadingSpinner />
+) : (
       <TagCloudHolder>
         {tags.map((tag) => (
           <SingleTag key={tag} onClick={() => setSelectedTag(tag)}>
@@ -99,7 +107,7 @@ const Dashboard = () => {
           </SingleTag>
         ))}
       </TagCloudHolder>
-
+)};
       <MediaResourceHolder>   
         {filteredImageResources.map((resource, index) => (
           <div key={index}>
