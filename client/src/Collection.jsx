@@ -3,6 +3,7 @@ import styled, {keyframes} from "styled-components";
 import TagManager from './components/TagManager';
 import { useUserContext } from './context/UserContext';
 import { useNavigate } from 'react-router-dom';
+import LoadingSpinner from './components/LoadingSpinner';
 
 const Collection = () => {
 
@@ -190,9 +191,7 @@ const Collection = () => {
       </ButtonHolder>
 
       {loading ? (
-  <LoaderContainer>
-    <Spinner />
-  </LoaderContainer>
+    <LoadingSpinner />
 ) : (
   <MyList>
     {sortResources(audioResources).map((resource) => (
@@ -236,33 +235,6 @@ const Collection = () => {
     </Wrapper>
   )
 }
-
-const SpinAnimation = keyframes`
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg);}
-`
-
-const LoaderContainer = styled.div`
-  width: 100%;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: fixed;
-  background: rgba(0, 0, 0, 0.834);
-  z-index: 1;
-`
-
-const Spinner = styled.div`
-  width: 64px;
-  height: 64px;
-  border: 8px solid;
-  border-color: #3d5af1 transparent #3d5af1 transparent;
-  border-radius: 50%;
-  animation-name: ${SpinAnimation};
-  animation-duration: 8s;
-  animation-iteration-count: infinite;
-`
 
 const BoldSpan = styled.span`
   font-weight: 700;

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import styled from "styled-components";
 import { useUserContext } from './context/UserContext';
 import TagManager from './components/TagManager';
+import LoadingSpinner from './components/LoadingSpinner';
 
 const SheetMusic = () => {
 
@@ -19,7 +20,7 @@ const SheetMusic = () => {
     const [itemDeleted, setItemDeleted] = useState(false);
     const [sortImageBy, setSortImageBy] = useState('newest');
     const [activeSortButton, setActiveSortButton] = useState();
-
+    //const [loading, setLoading] = useState(false);
   
     // handle sorting of elements by date
     const sortImageResources = (resources) => {
@@ -50,6 +51,7 @@ const SheetMusic = () => {
     
     async function fetchImageResources() {
         try {
+          setLoading(true);
           const response = await fetch(`/api/get-images?user=${loggedInUser}&project=${selectedProject}`);
           const data = await response.json();
           if (response.status === 200) {              
@@ -57,6 +59,7 @@ const SheetMusic = () => {
               setImageResources([]);
               setMessage('No sheet music yet!');
             } else {
+              setLoading(false);
               setImageResources(data);
               setMessage(''); 
             }
@@ -197,7 +200,9 @@ const SheetMusic = () => {
           </SortButton>
         </SortButtonContainer>
       </SortContainer>     
-
+      {loading ? (
+    <LoadingSpinner />
+) : (
       <GalleryWrapper>
         {sortImageResources(imageResources).map((image, index) => (
           <GalleryItem key={image.public_id + index}>
@@ -213,6 +218,7 @@ const SheetMusic = () => {
           </GalleryItem>
         ))}
       </GalleryWrapper>
+)};
 
       {activeImage && (
         <ModalOverlay onClick={closeModal}>
