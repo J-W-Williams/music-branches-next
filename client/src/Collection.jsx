@@ -205,9 +205,7 @@ const Collection = () => {
           <p>
             <BoldSpan>Date:</BoldSpan> {handleDate(resource.created_at)}
           </p>
-          <p>
-            <BoldSpan>Duration:</BoldSpan> {resource.bytes}
-          </p>
+      
         </InnerList>
         <TagManager
           resource={resource}
