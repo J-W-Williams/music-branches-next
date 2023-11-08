@@ -17,7 +17,7 @@ const TagManager = ({ resource, onUpdateTags, onDeleteTag }) => {
   
     return (
       <Wrapper>
-        <MainText><BoldSpan>Tags: </BoldSpan>(tap to edit) </MainText>
+        {/* <MainText><BoldSpan>Tags: </BoldSpan>(tap to edit) </MainText> */}
         <TagList>
           {resource.tags.map((tag, index) => (
             <Tag key={index} tag={tag} onDelete={() => onDeleteTag(tag, resource.public_id)} />
