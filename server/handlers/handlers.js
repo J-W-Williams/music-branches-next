@@ -179,7 +179,6 @@ const getResources = async (req, res, resourceType) => {
         const db = client.db(dbName);
         console.log("hello from attempted mongo");
         delete updatedResult.api_key;
-
         const mongoResult = await db.collection(collectionName).insertOne(updatedResult);
         client.close();
         res.status(200).json({
