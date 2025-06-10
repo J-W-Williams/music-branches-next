@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const multer = require('multer');
+// const { auth } = require('express-oauth2-jwt-bearer');
 
 // handlers
 const {
@@ -18,6 +19,7 @@ const app = express();
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
+// app.use(auth());
 
 // Multer configuration (to handle uploads)
 const storage = multer.memoryStorage();
