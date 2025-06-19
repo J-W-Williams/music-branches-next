@@ -1,22 +1,47 @@
-import { useUserContext } from './context/UserContext';
+// import { useAuth0 } from '@auth0/auth0-react';
+// import { useUserContext } from './context/UserContext';
+// import { styled } from 'styled-components';
+
+// const Login = () => {
+//   const { login } = useUserContext();
+
+//   const handleLogin = (user) => {
+//     login(user);
+//   };
+
+//   return (
+//     <Wrapper>
+//       <Title>Welcome to Music Branches</Title>
+//       <MainText>A place for all of your music ideas</MainText>
+//       <MyButton onClick={() => handleLogin('user1')}>Login as User 1</MyButton>
+//       <MyButton onClick={() => handleLogin('user2')}>Login as User 2</MyButton>
+//     </Wrapper>
+//   );
+// };
+
+import { useAuth0 } from '@auth0/auth0-react';
 import { styled } from 'styled-components';
 
 const Login = () => {
-  const { login } = useUserContext();
-
-  const handleLogin = (user) => {
-    login(user);
-  };
+  const { loginWithRedirect, logout, isAuthenticated, user } = useAuth0();
 
   return (
     <Wrapper>
       <Title>Welcome to Music Branches</Title>
       <MainText>A place for all of your music ideas</MainText>
-      <MyButton onClick={() => handleLogin('user1')}>Login as User 1</MyButton>
-      <MyButton onClick={() => handleLogin('user2')}>Login as User 2</MyButton>
+
+      {!isAuthenticated ? (
+        <MyButton onClick={() => loginWithRedirect()}>Log In</MyButton>
+      ) : (
+        <>
+          <p>Welcome, {user.name}</p>
+          <MyButton onClick={() => logout({ returnTo: window.location.origin })}>Log Out</MyButton>
+        </>
+      )}
     </Wrapper>
   );
 };
+
 
 const Title = styled.div`
   font-family: 'Sirin Stencil', cursive;
