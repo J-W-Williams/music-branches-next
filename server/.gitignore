@@ -23,3 +23,8 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Docker volumes and data
+*.log
+.docker/
+docker-compose.override.yml
