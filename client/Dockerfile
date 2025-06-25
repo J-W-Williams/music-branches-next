@@ -1,6 +1,12 @@
-FROM node:16 as build
+FROM node:18 as build
 
 WORKDIR /app
+
+ARG VITE_AUTH0_DOMAIN
+ARG VITE_AUTH0_CLIENT_ID
+
+ENV VITE_AUTH0_DOMAIN=$VITE_AUTH0_DOMAIN
+ENV VITE_AUTH0_CLIENT_ID=$VITE_AUTH0_CLIENT_ID
 
 COPY package.json yarn.lock ./
 RUN yarn install
@@ -10,7 +16,7 @@ RUN yarn build
 
 FROM nginx:alpine
 
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 COPY --from=build /app/dist /usr/share/nginx/html
 
