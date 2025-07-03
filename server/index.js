@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const multer = require('multer');
 // const { auth } = require('express-oauth2-jwt-bearer');
+require("dotenv").config();
 
 // handlers
 const {
@@ -30,7 +31,12 @@ app.use(morgan('tiny'))
 
 // access control config
 app.use(function (req, res, next) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  if (!process.env.FRONTEND_ORIGIN) {
+    throw new Error("FRONTEND_ORIGIN environment variable is not set");
+  }
+  const allowedOrigin = process.env.FRONTEND_ORIGIN;
+
+  res.setHeader("Access-Control-Allow-Origin", allowedOrigin);
   res.header(
     "Access-Control-Allow-Methods",
     "OPTIONS, HEAD, GET, PUT, POST, DELETE"
