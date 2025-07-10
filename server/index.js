@@ -1,7 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const multer = require('multer');
-// const { auth } = require('express-oauth2-jwt-bearer');
+const { auth } = require('express-oauth2-jwt-bearer');
 require("dotenv").config();
 
 // handlers
@@ -16,7 +16,16 @@ const {
 } = require("./handlers/handlers");
 
 const port = 8000;
+
+const jwtCheck = auth({
+  audience: process.env.AUTH0_AUDIENCE,
+  issuerBaseURL: `https://${process.env.AUTH0_DOMAIN}`,
+  tokenSigningAlg: 'RS256',
+});
+
 const app = express();
+
+app.use(jwtCheck);
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
