@@ -25,6 +25,7 @@ export const UserProvider = ({ children }) => {
       if (!loggedInUser) return;
       try {
         const token = await getAccessTokenSilently();
+        console.log("Access token from Auth0:", token);
         const response = await fetch('/api/get-user-projects', {
           method: 'GET',
           headers: {
