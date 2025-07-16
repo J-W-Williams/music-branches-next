@@ -4,10 +4,11 @@ import TagManager from './components/TagManager';
 import { useUserContext } from './context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from './components/LoadingSpinner';
-import { authFetch } from './utils/authFetch';
+import { useAuthFetch } from './utils/useAuthFetch';
 
 const Collection = () => {
 
+  const authFetch = useAuthFetch();
   const navigate = useNavigate();
   const [audioResources, setAudioResources] = useState([]);
   const [message, setMessage] = useState('');
