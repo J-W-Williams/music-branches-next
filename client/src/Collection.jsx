@@ -4,6 +4,7 @@ import TagManager from './components/TagManager';
 import { useUserContext } from './context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from './components/LoadingSpinner';
+import { authFetch } from './utils/authFetch';
 
 const Collection = () => {
 
@@ -47,7 +48,7 @@ const Collection = () => {
   const handleDeleteTag = async (tagToDelete, id) => {
     const collectionName = 'users';
     setTagDeleted(false);
-    const response = await fetch(`/api/delete-tag/${encodeURIComponent(id)}/${encodeURIComponent(tagToDelete)}/${encodeURIComponent(collectionName)}`, {
+    const response = await authFetch(`/api/delete-tag/${encodeURIComponent(id)}/${encodeURIComponent(tagToDelete)}/${encodeURIComponent(collectionName)}`, {
       method: 'DELETE',
     });      
     console.log("response:", response);
@@ -65,7 +66,7 @@ const Collection = () => {
 
           setLoading(true);
 
-          const response = await fetch(`/api/get-audio?user=${loggedInUser}&project=${selectedProject}`);
+          const response = await authFetch(`/api/get-audio?user=${loggedInUser}&project=${selectedProject}`);
           const data = await response.json();
           if (response.status === 200) {
             
@@ -95,7 +96,7 @@ const Collection = () => {
     const collectionName = 'users'; 
     setTagUpdated(false);
     if (newTags && newTags.length > 0) {
-      const response = await fetch(`/api/update-tags/${collectionName}`, { // Include the collection name in the URL
+      const response = await authFetch(`/api/update-tags/${collectionName}`, { // Include the collection name in the URL
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -121,7 +122,7 @@ const Collection = () => {
   const handleDestroy = async (resourceType, id) => {
     
     setItemDeleted(false);
-    const response = await fetch(`/api/delete-resource/${resourceType}/${id}`, {
+    const response = await authFetch(`/api/delete-resource/${resourceType}/${id}`, {
       method: 'DELETE',
     });
     console.log('response:', response);
