@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { AudioRecorder } from 'react-audio-voice-recorder';
 import { useUserContext } from './context/UserContext';
 import { styled } from 'styled-components';
+import { useAuthFetch } from './utils/useAuthFetch';
 
 const HomePage = () => {
 
+  const authFetch = useAuthFetch();
   const [tags, setTags] = useState('');
   const { loggedInUser, selectedProject } = useUserContext();
 
@@ -21,7 +23,7 @@ const HomePage = () => {
     formData.append('project', selectedProject);
 
     try {        
-        const response = await fetch('/api/upload-audio', {
+        const response = await authFetch('/api/upload-audio', {
             method: 'POST',
             body: formData,         
         });

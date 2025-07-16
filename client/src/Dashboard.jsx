@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import { useUserContext } from './context/UserContext';
 import { styled } from 'styled-components';
 import { Link } from 'react-router-dom';
+import { useAuthFetch } from './utils/useAuthFetch';
 
 const Dashboard = () => {
 
+  const authFetch = useAuthFetch();
   const { loggedInUser, logout, selectedProject } = useUserContext();
   const [audioResources, setAudioResources] = useState([]);
   const [imageResources, setImageResources] = useState([]);
@@ -28,8 +30,8 @@ const Dashboard = () => {
     async function fetchResourcesAndTags() {
       try {
     
-        const audioResponse = await fetch(`/api/get-audio?user=${loggedInUser}&project=${selectedProject}`);
-        const imageResponse = await fetch(`/api/get-images?user=${loggedInUser}&project=${selectedProject}`);
+        const audioResponse = await authFetch(`/api/get-audio?user=${loggedInUser}&project=${selectedProject}`);
+        const imageResponse = await authFetch(`/api/get-images?user=${loggedInUser}&project=${selectedProject}`);
         
         const audioData = await audioResponse.json();
         const imageData = await imageResponse.json();
@@ -54,7 +56,7 @@ const Dashboard = () => {
           console.error('Error fetching image resources:', imageData.message);
         }
         
-        const tagsResponse = await fetch(`/api/get-all-tags?user=${loggedInUser}&project=${selectedProject}`);
+        const tagsResponse = await authFetch(`/api/get-all-tags?user=${loggedInUser}&project=${selectedProject}`);
         if (tagsResponse.ok) {
           const tagsData = await tagsResponse.json();
           setTags(tagsData);

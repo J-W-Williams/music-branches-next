@@ -3,9 +3,11 @@ import styled from "styled-components";
 import { useUserContext } from './context/UserContext';
 import TagManager from './components/TagManager';
 import LoadingSpinner from './components/LoadingSpinner';
+import { useAuthFetch } from './utils/useAuthFetch';
 
 const SheetMusic = () => {
 
+    const authFetch = useAuthFetch();
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
@@ -52,7 +54,7 @@ const SheetMusic = () => {
     async function fetchImageResources() {
         try {
           setLoading(true);
-          const response = await fetch(`/api/get-images?user=${loggedInUser}&project=${selectedProject}`);
+          const response = await authFetch(`/api/get-images?user=${loggedInUser}&project=${selectedProject}`);
           const data = await response.json();
           if (response.status === 200) {              
             if (data.message === 'No clips found for this user/project combination') {
@@ -76,7 +78,7 @@ const SheetMusic = () => {
   const handleDeleteImageTag = async (tagToDelete, id) => {
     setTagDeleted(false);
     const collectionName = 'sheets';
-    const response = await fetch(`/api/delete-tag/${encodeURIComponent(id)}/${encodeURIComponent(tagToDelete)}/${encodeURIComponent(collectionName)}`, {
+    const response = await authFetch(`/api/delete-tag/${encodeURIComponent(id)}/${encodeURIComponent(tagToDelete)}/${encodeURIComponent(collectionName)}`, {
       method: 'DELETE',
     });      
     console.log("response:", response);
@@ -92,7 +94,7 @@ const SheetMusic = () => {
     const collectionName = 'sheets';
     setTagUpdated(false);
     if (newTags && newTags.length > 0) {
-      const response = await fetch(`/api/update-tags/${collectionName}`, {
+      const response = await authFetch(`/api/update-tags/${collectionName}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -117,7 +119,7 @@ const SheetMusic = () => {
   const handleDestroy = async (resourceType, id) => {
     
     setItemDeleted(false);
-    const response = await fetch(`/api/delete-resource/${resourceType}/${id}`, {
+    const response = await authFetch(`/api/delete-resource/${resourceType}/${id}`, {
       method: 'DELETE',
     });
     
@@ -134,7 +136,7 @@ const SheetMusic = () => {
       formData.append('user', loggedInUser);
       formData.append('project', selectedProject);
 
-      const response = await fetch('/api/upload-image', {
+      const response = await authFetch('/api/upload-image', {
           method: 'POST',
           body: formData,      
       });
