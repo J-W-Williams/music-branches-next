@@ -1,3 +1,4 @@
+import { useAuth0 } from '@auth0/auth0-react';
 import { useState } from 'react'
 import styled from "styled-components";
 import { useUserContext } from './context/UserContext';
@@ -5,7 +6,8 @@ import { Link } from 'react-router-dom';
 
 const Header = () => {
 
-  const { loggedInUser, logout, createProject, userProjects, selectedProject, setSelectedProject } = useUserContext();
+  const { loggedInUser, createProject, userProjects, selectedProject, setSelectedProject } = useUserContext();
+  const { logout: auth0Logout } = useAuth0();
   const [newProjectName, setNewProjectName] = useState('');
 
   const handleNewProjectChange = (event) => {
@@ -74,7 +76,12 @@ const Header = () => {
         </Navigation>     
         <Users>
           <div>Welcome, {loggedInUser}!</div>
-          <LogoutButton onClick={logout}>Logout</LogoutButton>   
+          {/* <LogoutButton onClick={logout}>Logout</LogoutButton>    */}
+          <LogoutButton onClick={() => {
+  localStorage.removeItem('loggedInUser');
+  localStorage.removeItem('selectedProject');
+  auth0Logout({ returnTo: window.location.origin });
+}}>Logout</LogoutButton>
         </Users> 
     </Wrapper>
     <Line></Line>
