@@ -77,10 +77,14 @@ const Header = () => {
         <Users>
           <div>Welcome, {loggedInUser}!</div>
           {/* <LogoutButton onClick={logout}>Logout</LogoutButton>    */}
-          <LogoutButton onClick={() => {
+    <LogoutButton onClick={() => {
   localStorage.removeItem('loggedInUser');
   localStorage.removeItem('selectedProject');
-  auth0Logout({ returnTo: window.location.origin });
+  auth0Logout({
+    logoutParams: {
+      returnTo: window.location.origin
+    }
+  });
 }}>Logout</LogoutButton>
         </Users> 
     </Wrapper>
